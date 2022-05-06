@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This template creates VPC Endpoints required by Veeam
+Parameters:
+  # TargetVPC:
+  #   Description: (Required) Target VPC
+  #   Type: String
+  #   AllowedPattern: ^.+$
+  UpdateParameter:
+    Description: (Optional) Update parameter for service catalog
+    Type: String
+  # uai:
+  #   Type: String
+  # app:
+  #   Type: String
+  # role:
+  #   Type: String
+  #   Default: "app"
+  # env:
+  #   Type: String
+  #   Default: "dev"
+  IPCIDR:
+    Type: String
+Resources:
+   S3Endpoint:
+    Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+    Properties:
+     ProductName: "VPC Endpoint (Interface)"
+     ProvisioningArtifactName: "{{resolve:ssm:/ServiceCatalog/VPCEndpointInterface/LatestVersion:1}}"
+     ProvisioningParameters:
+      - Key: "UpdateParameter"
+        Value: !Ref UpdateParameter
+      - Key: "ServiceName"
+        Value: "s3"
+      - Key: "IPCIDR"
+        Value: !Ref IPCIDR
+
+Outputs:
+   S3EndpointId:
+    Description: CodeBuild endpoint id
+    Value: !GetAtt 'S3Endpoint.Outputs.MyEndpointId'
